@@ -37,6 +37,7 @@ LDFLAGS	= -T ix.ld -no-pie
 LDLIBS	= -lrt -lpthread -lm -lnuma -ldl -lconfig ../deps/rocksdb/librocksdb.a -lgflags -lsnappy -lz -llz4
 WRAP_FLAGS = -Wl,-wrap,malloc -Wl,-wrap=malloc -Wl,-wrap=free -Wl,-wrap=calloc -Wl,-wrap=realloc
 
+#DEBUG=1
 ifneq ($(DEBUG),)
 CFLAGS += -DDEBUG
 endif

@@ -90,12 +90,16 @@ static inline int udp_send_one(void * data, size_t len, struct ip_tuple * id)
 	int ret = 0;
 	struct mbuf *pkt;
 
-	if (unlikely(len > UDP_MAX_LEN))
+	if (unlikely(len > UDP_MAX_LEN)) {
+        log_debug("len > UDP_MAX_LEN\n");
 		return -RET_INVAL;
+    }
 
 	pkt = mbuf_alloc_local();
-	if (unlikely(!pkt))
+	if (unlikely(!pkt)) {
+        log_debug("!pkt\n");
 		return -RET_NOBUFS;
+    }
 
 	struct eth_hdr *ethhdr = mbuf_mtod(pkt, struct eth_hdr *);
 	struct ip_hdr *iphdr = mbuf_nextd(ethhdr, struct ip_hdr *);
@@ -106,6 +110,7 @@ static inline int udp_send_one(void * data, size_t len, struct ip_tuple * id)
 
 	dst_addr.addr = id->dst_ip;
 	if (arp_lookup_mac(&dst_addr, &ethhdr->dhost)) {
+        log_debug("arp_lookup_mac failed for ip %d\n", dst_addr.addr);
 		ret = -RET_AGAIN;
 		goto out;
         }

@@ -300,13 +300,43 @@ static inline struct request * rq_update(struct request_queue * rq, struct mbuf 
 	// Get data and udp header
 	void * data = mbuf_nextd(udphdr, void *);
 	struct message * msg = (struct message *) data;
-	uint16_t type = msg->type;
+
+
+		// To force packet compliance with non-IX comatible clients
+/*
+		msg->runNs = 1000;
+	   msg->genNs = 0;
+		msg->pkts_length = 1;
+		msg->queue_length[0] = 0;
+		msg->queue_length[1] = 0;
+		msg->queue_length[2] = 0;
+		msg->client_id = 0;
+		msg->req_id = 0;
+		msg->seq_num = 0;
+		msg->type = 0;
+		struct request * req = mempool_alloc(&request_mempool);
+		if (!req) {
+			log_debug("Could not allocate memory for request\n");
+            mbuf_free(pkt);
+			return NULL;
+		}
+		req->type = 0;
+		req->pkts_length = 1;
+		req->mbufs[0] = pkt;
+		return req;
+		//
+*/
+	uint16_t type = msg->type - 1;
         uint16_t seq_num = msg->seq_num;
         uint16_t client_id = msg->client_id;
         uint32_t req_id = msg->req_id;
         uint32_t pkts_length = msg->pkts_length / sizeof(struct message);
 	if (pkts_length == 1) {
 		struct request * req = mempool_alloc(&request_mempool);
+        if(unlikely(!req)) {
+            mbuf_free(pkt);
+            return NULL;
+        }
 		req->type = type;
 		req->pkts_length = 1;
 		req->mbufs[0] = pkt;

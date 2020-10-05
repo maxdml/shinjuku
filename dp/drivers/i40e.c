@@ -283,7 +283,7 @@ static int dev_start(struct ix_rte_eth_dev *dev)
 		#ifdef RTE_LIBRTE_IEEE1588
 			tx_ctx.timesync_ena = 1;
 		#endif
-		tx_ctx.rdylist = 0;
+		tx_ctx.rdylist = 1;
 		tx_ctx.fd_ena = TRUE;
 		tx_ctx.base = txq->ring_physaddr / I40E_QUEUE_BASE_ADDR_UNIT;
 		tx_ctx.qlen = txq->len;
@@ -364,10 +364,12 @@ static int i40e_rx_poll(struct eth_rx_queue *rx)
 
 		error_bits = (qword1 >> I40E_RXD_QW1_ERROR_SHIFT);
 		/* Check IP checksum calculated by hardware (if applicable) */
+        /*
 		if (unlikely(error_bits & (1 << I40E_RX_DESC_ERROR_IPE_SHIFT))) {
 			log_err("i40e: IP RX checksum error, dropping pkt\n");
 			valid_checksum = false;
 		}
+        */
 
 		/* Check TCP checksum calculated by hardware (if applicable) */
 		if (unlikely(error_bits & (1 << I40E_RX_DESC_ERROR_L4E_SHIFT))) {
@@ -389,7 +391,7 @@ static int i40e_rx_poll(struct eth_rx_queue *rx)
 
 		new_b = mbuf_alloc_local();
 		if (unlikely(!new_b)) {
-			log_err("i40e: unable to allocate RX mbuf\n");
+			log_debug("i40e: unable to allocate RX mbuf\n");
 			goto out;
 		}
 
@@ -633,6 +635,7 @@ static int i40e_tx_xmit(struct eth_tx_queue *tx, int nr, struct mbuf **mbufs)
 	if (nb_pkts) {
 		rte_wmb();
 		I40E_PCI_REG_WRITE(txq->tdt_reg_addr, txq->tail & (txq->len - 1));
+        log_debug("i40e rung the doorbell\n");
 	}
 
 	return nb_pkts;

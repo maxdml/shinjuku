@@ -133,17 +133,24 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
 	rocksdb_iter_destroy(iter);
 	rocksdb_readoptions_destroy(readoptions);
 	/*
-        uint64_t i = 0;
-        do {
-                asm volatile ("nop");
-                i++;
-        } while ( i / 0.233 < req->runNs);*/
+        log_debug("spinning for %lu\n", req->runNs);
+uint32_t i = 0;
+uint32_t nloops = (uint32_t) req->runNs * 2.5;
+//uint64_t start = rdtscp(NULL);
+for (i = 0; i < nloops; ++i) {
+    asm volatile ("nop");
+}
+uint64_t end = rdtscp(NULL);
+printf("Spinned for %lf us\n", (end - start) / 2.593);
+printf("=====================================");
+*/
 
         asm volatile ("cli":::);
         struct message resp;
 	resp.genNs = req->genNs;
 	resp.runNs = req->runNs;
 	resp.type = TYPE_RES;
+    resp.req_id = req->req_id;
 
 	int j;
 	for (j = 0; j < 3; j++) {
@@ -163,7 +170,7 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
 
         ret = udp_send_one((void *)&resp, sizeof(struct message), &new_id);
         if (ret)
-                log_warn("udp_send failed with error %d\n", ret);
+                log_warn("udp_send failed with error %d\n", strerror(-ret));
 
         finished = true;
         swapcontext_very_fast(cont, &uctx_main);

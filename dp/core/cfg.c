@@ -48,7 +48,7 @@
 #include <net/ip.h>
 #include <ix/ethdev.h>
 
-#define DEFAULT_CONF_FILE "./shinjuku.conf"
+#define DEFAULT_CONF_FILE "/opt/shinjuku/shinjuku.conf"
 
 struct cfg_parameters CFG;
 

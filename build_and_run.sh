@@ -8,3 +8,4 @@ cp -r db/my_db /tmp/my_db
 make clean
 make -sj64
 LD_PRELOAD=./deps/opnew/dest/libnew.so ./dp/shinjuku
+#sudo numactl -N0 -m0 ./dp/shinjuku
