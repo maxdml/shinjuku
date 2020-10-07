@@ -56,6 +56,8 @@
 #include <net/udp.h>
 #include <net/ethernet.h>
 
+#include "fake_work.h"
+
 #define TYPE_REQ 1
 #define TYPE_RES 0
 #define PREEMPT_VECTOR 0xf2
@@ -104,6 +106,15 @@ static void test_handler(struct dune_tf *tf)
         swapcontext_fast_to_control(cont, &uctx_main);
 }
 
+int compare( const void* a, const void* b) {
+     int int_a = * ( (int*) a );
+     int int_b = * ( (int*) b );
+
+     if ( int_a == int_b ) return 0;
+     else if ( int_a < int_b ) return -1;
+     else return 1;
+}
+
 /**
  * generic_work - generic function acting as placeholder for application-level
  *                work
@@ -121,6 +132,7 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
 
         struct message * req = (struct message *) data;
 
+#ifdef ROCKSDB
 	rocksdb_readoptions_t * readoptions = rocksdb_readoptions_create();
 	rocksdb_iterator_t * iter = rocksdb_create_iterator(db, readoptions);
 	for (rocksdb_iter_seek_to_first(iter); rocksdb_iter_valid(iter); rocksdb_iter_next(iter)) {
@@ -132,18 +144,24 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
 	}
 	rocksdb_iter_destroy(iter);
 	rocksdb_readoptions_destroy(readoptions);
-	/*
-        log_debug("spinning for %lu\n", req->runNs);
-uint32_t i = 0;
-uint32_t nloops = (uint32_t) req->runNs * 2.5;
-//uint64_t start = rdtscp(NULL);
-for (i = 0; i < nloops; ++i) {
-    asm volatile ("nop");
-}
-uint64_t end = rdtscp(NULL);
-printf("Spinned for %lf us\n", (end - start) / 2.593);
-printf("=====================================");
+#else
+    log_debug("spinning for %lu\n", req->runNs);
+    unsigned int nloops = (unsigned int) req->runNs * 2.5;
+/*
+    double durations[1000];
+    for (unsigned int i = 0 ; i < 1000; i++) {
+        uint64_t start = rdtscp(NULL);
 */
+        fake_work(nloops);
+/*
+        uint64_t end = rdtscp(NULL);
+        durations[i] = (end - start) / 2.5;
+    }
+    qsort(durations, 1000, sizeof(double), compare);
+    printf("median: %f\n", durations[500]);
+    printf("p99.9: %f\n", durations[999]);
+*/
+#endif
 
         asm volatile ("cli":::);
         struct message resp;
