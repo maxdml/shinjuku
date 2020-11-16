@@ -133,23 +133,50 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
         struct message * req = (struct message *) data;
 
 #ifdef ROCKSDB
-	rocksdb_readoptions_t * readoptions = rocksdb_readoptions_create();
-	rocksdb_iterator_t * iter = rocksdb_create_iterator(db, readoptions);
-	for (rocksdb_iter_seek_to_first(iter); rocksdb_iter_valid(iter); rocksdb_iter_next(iter)) {
-		char * retr_key;
-		size_t klen;
-		retr_key = rocksdb_iter_key(iter, &klen);
-		if (req->runNs > 0)
-			break;
-	}
-	rocksdb_iter_destroy(iter);
-	rocksdb_readoptions_destroy(readoptions);
+    rocksdb_readoptions_t *readoptions = rocksdb_readoptions_create();
+/*
+    log_info("Received runNs=%u\n", req->runNs);
+    uint64_t durations[1000];
+    unsigned int i = 0;
+    for (i = 0; i < 1000; i++) {
+        uint64_t start = rdtscp(NULL);
+*/
+        if (req->type == 1) {
+            //log_info("doing scan\n");
+            /* SCAN */
+            rocksdb_iterator_t * iter = rocksdb_create_iterator(db, readoptions);
+            for (rocksdb_iter_seek_to_first(iter); rocksdb_iter_valid(iter); rocksdb_iter_next(iter)) {
+                char * retr_key;
+                size_t klen;
+                retr_key = rocksdb_iter_key(iter, &klen);
+            }
+            rocksdb_iter_destroy(iter);
+        } else {
+            //log_info("doing get\n");
+            /* GET */
+            size_t len;
+            const char key[10];
+            char *err = NULL;
+            snprintf(key, 10, "key%d", req->req_id % 10000);
+            char *returned_value = rocksdb_get(db, readoptions, key, strlen(key), &len, &err);
+            if (unlikely(err)) {
+                log_err("GET error: %s\n", err);
+            }
+            //printf("%s:%s\n", key, returned_value);
+        }
+/*
+        uint64_t end = rdtscp(NULL);
+        durations[i] = (uint64_t) ((end - start) / 2.5);
+    }
+*/
+    rocksdb_readoptions_destroy(readoptions);
 #else
     log_debug("spinning for %lu\n", req->runNs);
     unsigned int nloops = (unsigned int) req->runNs * 2.5;
 /*
     double durations[1000];
-    for (unsigned int i = 0 ; i < 1000; i++) {
+    unsigned int i;
+    for (i = 0 ; i < 1000; i++) {
         uint64_t start = rdtscp(NULL);
 */
         fake_work(nloops);
@@ -157,14 +184,17 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
         uint64_t end = rdtscp(NULL);
         durations[i] = (end - start) / 2.5;
     }
-    qsort(durations, 1000, sizeof(double), compare);
-    printf("median: %f\n", durations[500]);
-    printf("p99.9: %f\n", durations[999]);
 */
 #endif
-
-        asm volatile ("cli":::);
-        struct message resp;
+/*
+    qsort(durations, i, sizeof(double), compare);
+    printf("stats for %u iterations: \n", i);
+    printf("median: %lu\n", durations[i/2]);
+    printf("p99.9: %lu\n", durations[i * 999/1000]);
+    printf("====================\n");
+*/
+    asm volatile ("cli":::);
+    struct message resp;
 	resp.genNs = req->genNs;
 	resp.runNs = req->runNs;
 	resp.type = TYPE_RES;

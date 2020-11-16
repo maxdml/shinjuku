@@ -30,13 +30,14 @@ DPDK_INC = -I$(DPDK)/build/include -I$(DPDK)/lib/librte_eal/common -I$(DPDK)/dri
 INC	= -I../inc -I$(DUNE)/libdune -I../inc/lwip -I../inc/lwip/ipv4 -I../inc/lwip/ipv6 $(DPDK_INC) -include$(DUNE)/kern/dune.h
 INC	+= -I$(PCIDMA) -I/opt/fake_work
 INC	+= -I../deps/rocksdb/include/rocksdb
-CC	= gcc
-CFLAGS	= -g -Wall -fno-pie -fno-dwarf2-cfi-asm -fno-asynchronous-unwind-tables -O3 -mno-red-zone $(INC) -D__KERNEL__ $(EXTRA_CFLAGS)
-LD	= g++
-LDFLAGS	= -T ix.ld -no-pie
+CC = gcc
+CFLAGS = -g -Wall -fno-pie -fno-dwarf2-cfi-asm -fno-asynchronous-unwind-tables -O3 -mno-red-zone $(INC) -D__KERNEL__ $(EXTRA_CFLAGS)
+LD = g++
 LDFLAGS	= -T ix.ld -no-pie -L/opt/fake_work
 LDLIBS	= -lrt -lpthread -lm -lnuma -ldl -lconfig -lfake ../deps/rocksdb/librocksdb.a -lgflags -lsnappy -lz -llz4
 WRAP_FLAGS = -Wl,-wrap,malloc -Wl,-wrap=malloc -Wl,-wrap=free -Wl,-wrap=calloc -Wl,-wrap=realloc
+
+CFLAGS += -DROCKSDB
 
 #DEBUG=1
 ifneq ($(DEBUG),)

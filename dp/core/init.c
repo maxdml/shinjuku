@@ -109,7 +109,6 @@ struct init_vector_t {
 	int (*ffg)(unsigned int);
 };
 
-
 static struct init_vector_t init_tbl[] = {
 	{ "CPU",     cpu_init,     NULL, NULL},
 	{ "Dune",    init_dune,    NULL, NULL},
@@ -423,6 +422,32 @@ int main(int argc, char *argv[])
 
 	log_info("init: starting Shinjuku\n");
 
+#ifdef ROCKSDB
+	// Initialize RocksDB
+	rocksdb_options_t *options = rocksdb_options_create();
+	rocksdb_options_set_allow_mmap_reads(options, 1);
+	rocksdb_options_set_allow_mmap_writes(options, 1);
+	rocksdb_slicetransform_t * prefix_extractor = rocksdb_slicetransform_create_fixed_prefix(8);
+	rocksdb_options_set_prefix_extractor(options, prefix_extractor);
+	//rocksdb_options_set_plain_table_factory(options, 0, 10, 0.75, 3);
+        // Optimize RocksDB. This is the easiest way to
+        // get RocksDB to perform well
+	rocksdb_options_increase_parallelism(options, 0);
+	rocksdb_options_optimize_level_style_compaction(options, 0);
+	// create the DB if it's not already present
+	rocksdb_options_set_create_if_missing(options, 1);
+
+	// open DB
+	char *err = NULL;
+	char DBPath[] = "/tmp/my_db";
+	db = rocksdb_open(options, DBPath, &err);
+    if (err) {
+        log_err("Could not open RocksDB database: %s\n", err);
+        exit(1);
+    }
+	flag = 1;
+    log_info("Initialized RocksDB\n");
+#endif
 	log_info("init: cpu phase\n");
 	for (i = 0; init_tbl[i].name; i++)
         {
@@ -435,29 +460,7 @@ int main(int argc, char *argv[])
         }
         log_info("init done\n");
 
-	// Initialize RocksDB
-	rocksdb_options_t *options = rocksdb_options_create();
-	rocksdb_options_set_allow_mmap_reads(options, 1);
-	rocksdb_options_set_allow_mmap_writes(options, 1);
-	rocksdb_slicetransform_t * prefix_extractor = rocksdb_slicetransform_create_fixed_prefix(8);
-	rocksdb_options_set_prefix_extractor(options, prefix_extractor);
-	rocksdb_options_set_plain_table_factory(options, 0, 10, 0.75, 3);
-        // Optimize RocksDB. This is the easiest way to
-        // get RocksDB to perform well
-	rocksdb_options_increase_parallelism(options, 0);
-	rocksdb_options_optimize_level_style_compaction(options, 0);
-	// create the DB if it's not already present
-	rocksdb_options_set_create_if_missing(options, 1);
-
-	// open DB
-	char *err = NULL;
-	char DBPath[] = "/tmp/my_db";
-	db = rocksdb_open(options, DBPath, &err);
-	assert(!err);
-	flag = 1;
-
         do_dispatching(CFG.num_cpus);
 	log_info("finished handling contexts, looping forever...\n");
 	return 0;
 }
-

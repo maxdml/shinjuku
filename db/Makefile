@@ -2,12 +2,15 @@
 
 PLATFORM_LDFLAGS  = -lrt -lpthread -lm -lnuma -ldl -lconfig ../deps/rocksdb/librocksdb.a -lgflags -lsnappy -lz -llz4
 
-all: create_db
+all: create_db read_db
 
 .c.o:
-	$(CC) $(CFLAGS) -c $< -o $@ -I../deps/rocksdb/include
+	$(CXX) $(CFLAGS) -ggdb -O0 -c $< -o $@ -I../deps/rocksdb/include
 
 create_db: librocksdb create_db.o
+	$(CXX) $@.o -o$@ ../deps/rocksdb/librocksdb.a $(PLATFORM_LDFLAGS) $(EXEC_LDFLAGS)
+
+read_db: librocksdb read_db.o
 	$(CXX) $@.o -o$@ ../deps/rocksdb/librocksdb.a $(PLATFORM_LDFLAGS) $(EXEC_LDFLAGS)
 
 clean:

@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <random>
 
 #include "rocksdb/c.h"
 
@@ -24,14 +25,23 @@ int main(int argc, char **argv) {
   // open DB
   char *err = NULL;
   db = rocksdb_open(options, DBPath, &err);
-  assert(!err);
+  if (err) {
+      printf("Failed to open DB: %s\n", err);
+      exit(1);
+  }
+
+  // Setup RNG
+    std::random_device rd;
+    std::mt19937_64 e2(rd());
+    std::uniform_int_distribution<long long int> dist(std::llround(std::pow(2,64)));
 
   // Put key-value
   rocksdb_writeoptions_t *writeoptions = rocksdb_writeoptions_create();
-  const char *value = "value";
-  for (int i = 0; i < 5000; i++) {
+  for (int i = 0; i < 10000; i++) {
 	char key[10];
+    char value[64];
 	snprintf(key, 10, "key%d", i);
+    snprintf(value, 65, "%lld", dist(e2));
 	rocksdb_put(db, writeoptions, key, strlen(key), value, strlen(value) + 1,
                     &err);
         assert(!err);
@@ -39,15 +49,19 @@ int main(int argc, char **argv) {
 
   // Get value
   rocksdb_readoptions_t *readoptions = rocksdb_readoptions_create();
-  for (int i = 0; i < 5000; i++) {
+  for (int i = 0; i < 10000; i++) {
 	size_t len;
 	char key[10];
 	snprintf(key, 10, "key%d", i);
 	char *returned_value =
 		rocksdb_get(db, readoptions, key, strlen(key), &len, &err);
-	assert(!err);
-	assert(strcmp(returned_value, "value") == 0);
-	free(returned_value);
+    if (err) {
+        printf("GET failed: %s\n", err);
+        break;
+    }
+    printf("Returned value: %s\n", returned_value);
+	//assert(strcmp(returned_value, "value") == 0);
+	//free(returned_value);
   }
 
   // cleanup
