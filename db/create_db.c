@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
         printf("GET failed: %s\n", err);
         break;
     }
-    printf("Returned value: %s\n", returned_value);
+    //printf("Returned value: %s\n", returned_value);
 	//assert(strcmp(returned_value, "value") == 0);
 	//free(returned_value);
   }

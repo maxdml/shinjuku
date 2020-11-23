@@ -109,6 +109,7 @@ struct init_vector_t {
 	int (*ffg)(unsigned int);
 };
 
+
 static struct init_vector_t init_tbl[] = {
 	{ "CPU",     cpu_init,     NULL, NULL},
 	{ "Dune",    init_dune,    NULL, NULL},
@@ -422,6 +423,17 @@ int main(int argc, char *argv[])
 
 	log_info("init: starting Shinjuku\n");
 
+	log_info("init: cpu phase\n");
+	for (i = 0; init_tbl[i].name; i++)
+        {
+		if (init_tbl[i].f) {
+			ret = init_tbl[i].f();
+			log_info("init: module %-10s %s\n", init_tbl[i].name, (ret ? "FAILURE" : "SUCCESS"));
+			if (ret)
+				panic("could not initialize IX\n");
+                }
+        }
+        log_info("init done\n");
 #ifdef ROCKSDB
 	// Initialize RocksDB
 	rocksdb_options_t *options = rocksdb_options_create();
@@ -448,17 +460,6 @@ int main(int argc, char *argv[])
 	flag = 1;
     log_info("Initialized RocksDB\n");
 #endif
-	log_info("init: cpu phase\n");
-	for (i = 0; init_tbl[i].name; i++)
-        {
-		if (init_tbl[i].f) {
-			ret = init_tbl[i].f();
-			log_info("init: module %-10s %s\n", init_tbl[i].name, (ret ? "FAILURE" : "SUCCESS"));
-			if (ret)
-				panic("could not initialize IX\n");
-                }
-        }
-        log_info("init done\n");
 
         do_dispatching(CFG.num_cpus);
 	log_info("finished handling contexts, looping forever...\n");

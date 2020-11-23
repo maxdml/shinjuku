@@ -133,15 +133,15 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
         struct message * req = (struct message *) data;
 
 #ifdef ROCKSDB
+    log_debug("Received req type %u\n", req->type);
     rocksdb_readoptions_t *readoptions = rocksdb_readoptions_create();
 /*
-    log_info("Received runNs=%u\n", req->runNs);
     uint64_t durations[1000];
     unsigned int i = 0;
     for (i = 0; i < 1000; i++) {
         uint64_t start = rdtscp(NULL);
 */
-        if (req->type == 1) {
+//        if (req->type == 2) {
             //log_info("doing scan\n");
             /* SCAN */
             rocksdb_iterator_t * iter = rocksdb_create_iterator(db, readoptions);
@@ -149,11 +149,15 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
                 char * retr_key;
                 size_t klen;
                 retr_key = rocksdb_iter_key(iter, &klen);
+                log_debug("Scanned key %s\n", retr_key);
+                if (req->type == 1)
+                    break;
             }
             rocksdb_iter_destroy(iter);
-        } else {
+//        } else {
             //log_info("doing get\n");
             /* GET */
+/*
             size_t len;
             const char key[10];
             char *err = NULL;
@@ -162,8 +166,10 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
             if (unlikely(err)) {
                 log_err("GET error: %s\n", err);
             }
+            log_debug("%s:%s\n", key, returned_value);
             //printf("%s:%s\n", key, returned_value);
-        }
+       }
+*/
 /*
         uint64_t end = rdtscp(NULL);
         durations[i] = (uint64_t) ((end - start) / 2.5);
