@@ -8,5 +8,5 @@ cp -r /opt/shinjuku/db/my_db /tmp/my_db
 cd /opt/shinjuku
 make clean
 make -sj64
-#sudo /opt/shinjuku/dp/shinjuku
-LD_PRELOAD=/opt/shinjuku/dest/libnew.so sudo -E /opt/shinjuku/dp/shinjuku
+#LD_PRELOAD=/opt/shinjuku/dest/libnew.so sudo -E /opt/shinjuku/dp/shinjuku
+sudo /opt/shinjuku/dp/shinjuku

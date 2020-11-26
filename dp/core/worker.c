@@ -133,31 +133,38 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
         struct message * req = (struct message *) data;
 
 #ifdef ROCKSDB
-    log_debug("Received req type %u\n", req->type);
+    asm volatile ("cli":::);
     rocksdb_readoptions_t *readoptions = rocksdb_readoptions_create();
+    asm volatile ("sti":::);
 /*
     uint64_t durations[1000];
     unsigned int i = 0;
     for (i = 0; i < 1000; i++) {
         uint64_t start = rdtscp(NULL);
 */
-//        if (req->type == 2) {
-            //log_info("doing scan\n");
-            /* SCAN */
+        if (req->type == 2) {
+            asm volatile ("cli":::);
             rocksdb_iterator_t * iter = rocksdb_create_iterator(db, readoptions);
-            for (rocksdb_iter_seek_to_first(iter); rocksdb_iter_valid(iter); rocksdb_iter_next(iter)) {
+            rocksdb_iter_seek_to_first(iter);
+            asm volatile ("sti":::);
+            while (true) {
+                asm volatile ("cli":::);
+                if (!rocksdb_iter_valid(iter))
+                    asm volatile ("sti":::);
+                    break;
+                asm volatile ("sti":::);
                 char * retr_key;
                 size_t klen;
+                asm volatile ("cli":::);
                 retr_key = rocksdb_iter_key(iter, &klen);
                 log_debug("Scanned key %s\n", retr_key);
-                if (req->type == 1)
-                    break;
+                rocksdb_iter_next(iter);
+                asm volatile ("sti":::);
             }
+            asm volatile ("cli":::);
             rocksdb_iter_destroy(iter);
-//        } else {
-            //log_info("doing get\n");
-            /* GET */
-/*
+            asm volatile ("sti":::);
+        } else {
             size_t len;
             const char key[10];
             char *err = NULL;
@@ -169,13 +176,14 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
             log_debug("%s:%s\n", key, returned_value);
             //printf("%s:%s\n", key, returned_value);
        }
-*/
 /*
         uint64_t end = rdtscp(NULL);
         durations[i] = (uint64_t) ((end - start) / 2.5);
     }
 */
+    asm volatile ("cli":::);
     rocksdb_readoptions_destroy(readoptions);
+    asm volatile ("sti":::);
 #else
     log_debug("spinning for %lu\n", req->runNs);
     unsigned int nloops = (unsigned int) req->runNs * 2.5;
