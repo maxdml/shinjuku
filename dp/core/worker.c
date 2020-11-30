@@ -142,40 +142,52 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
     for (i = 0; i < 1000; i++) {
         uint64_t start = rdtscp(NULL);
 */
-        if (req->type == 2) {
+        //if (req->type == 2) {
             asm volatile ("cli":::);
             rocksdb_iterator_t * iter = rocksdb_create_iterator(db, readoptions);
+            asm volatile ("sti":::);
+
+            asm volatile ("cli":::);
             rocksdb_iter_seek_to_first(iter);
             asm volatile ("sti":::);
-            while (true) {
+            int  i=0;
+            while(true) {
                 asm volatile ("cli":::);
-                if (!rocksdb_iter_valid(iter))
-                    asm volatile ("sti":::);
+                if (!rocksdb_iter_valid(iter)) {
                     break;
+                }
+                i++;
                 asm volatile ("sti":::);
                 char * retr_key;
                 size_t klen;
                 asm volatile ("cli":::);
                 retr_key = rocksdb_iter_key(iter, &klen);
                 log_debug("Scanned key %s\n", retr_key);
+                asm volatile ("sti":::);
+                if (req->type == 1)
+                    break;
+                asm volatile ("cli":::);
                 rocksdb_iter_next(iter);
                 asm volatile ("sti":::);
             }
             asm volatile ("cli":::);
             rocksdb_iter_destroy(iter);
             asm volatile ("sti":::);
+        /*
         } else {
             size_t len;
-            const char key[10];
+            const char key[11];
             char *err = NULL;
-            snprintf(key, 10, "key%d", req->req_id % 10000);
+            snprintf(key, 10, "key%d", req->req_id % 7000);
+            asm volatile ("cli":::);
             char *returned_value = rocksdb_get(db, readoptions, key, strlen(key), &len, &err);
+            asm volatile ("sti":::);
             if (unlikely(err)) {
                 log_err("GET error: %s\n", err);
             }
             log_debug("%s:%s\n", key, returned_value);
-            //printf("%s:%s\n", key, returned_value);
-       }
+        }
+        */
 /*
         uint64_t end = rdtscp(NULL);
         durations[i] = (uint64_t) ((end - start) / 2.5);

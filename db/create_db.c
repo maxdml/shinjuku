@@ -37,8 +37,8 @@ int main(int argc, char **argv) {
 
   // Put key-value
   rocksdb_writeoptions_t *writeoptions = rocksdb_writeoptions_create();
-  for (int i = 0; i < 10000; i++) {
-	char key[10];
+  for (int i = 0; i < 7000; i++) {
+	char key[11];
     char value[64];
 	snprintf(key, 10, "key%d", i);
     snprintf(value, 65, "%lld", dist(e2));
@@ -48,10 +48,11 @@ int main(int argc, char **argv) {
   }
 
   // Get value
+  /*
   rocksdb_readoptions_t *readoptions = rocksdb_readoptions_create();
-  for (int i = 0; i < 10000; i++) {
+  for (int i = 0; i < 7000; i++) {
 	size_t len;
-	char key[10];
+	char key[11];
 	snprintf(key, 10, "key%d", i);
 	char *returned_value =
 		rocksdb_get(db, readoptions, key, strlen(key), &len, &err);
@@ -63,10 +64,11 @@ int main(int argc, char **argv) {
 	//assert(strcmp(returned_value, "value") == 0);
 	//free(returned_value);
   }
+  */
 
   // cleanup
   rocksdb_writeoptions_destroy(writeoptions);
-  rocksdb_readoptions_destroy(readoptions);
+  //rocksdb_readoptions_destroy(readoptions);
   rocksdb_options_destroy(options);
   rocksdb_close(db);
 
