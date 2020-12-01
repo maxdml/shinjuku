@@ -150,13 +150,11 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
             asm volatile ("cli":::);
             rocksdb_iter_seek_to_first(iter);
             asm volatile ("sti":::);
-            int  i=0;
-            while(true) {
+            while (true) {
                 asm volatile ("cli":::);
                 if (!rocksdb_iter_valid(iter)) {
                     break;
                 }
-                i++;
                 asm volatile ("sti":::);
                 char * retr_key;
                 size_t klen;
@@ -216,6 +214,7 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
     qsort(durations, i, sizeof(double), compare);
     printf("stats for %u iterations: \n", i);
     printf("median: %lu\n", durations[i/2]);
+    printf("p99: %lu\n", durations[i * 99/100]);
     printf("p99.9: %lu\n", durations[i * 999/1000]);
     printf("====================\n");
 */

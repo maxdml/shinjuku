@@ -37,11 +37,13 @@ int main(int argc, char **argv) {
 
   // Put key-value
   rocksdb_writeoptions_t *writeoptions = rocksdb_writeoptions_create();
-  for (int i = 0; i < 7000; i++) {
+  const char *value = "value";
+  for (int i = 0; i < 5000; i++) {
 	char key[11];
-    char value[64];
+    //char value[64];
 	snprintf(key, 10, "key%d", i);
-    snprintf(value, 65, "%lld", dist(e2));
+    //snprintf(value, 65, "%lld", dist(e2));
+    //snprintf(value, 6, "value");
 	rocksdb_put(db, writeoptions, key, strlen(key), value, strlen(value) + 1,
                     &err);
         assert(!err);

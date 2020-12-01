@@ -91,7 +91,9 @@ void *mempool_alloc_2(struct mempool *m)
 		m->head = h->next;
 		mds->free_chunks--;
 		mds->num_locks++;
-	}
+	} else {
+        log_err("%s has no valid head \n", m->datastore->prettyname);
+    }
 	spin_unlock(&mds->lock);
 #ifdef DEBUG_MEMPOOL
 	struct mempool_hdr *cur = h;
