@@ -48,7 +48,7 @@
 #include <net/ip.h>
 #include <ix/ethdev.h>
 
-#define DEFAULT_CONF_FILE "/opt/shinjuku/shinjuku.conf"
+#define DEFAULT_CONF_FILE "/proj/psp-PG0/maxdml/Persephone/submodules/shinjuku/shinjuku.conf"
 
 struct cfg_parameters CFG;
 
