@@ -31,7 +31,7 @@ INC	= -I../inc -I$(DUNE)/libdune -I../inc/lwip -I../inc/lwip/ipv4 -I../inc/lwip/
 INC	+= -I$(PCIDMA) -I$(AE_DIR)/fake_work
 INC	+= -I../deps/rocksdb/include/rocksdb
 CC = gcc
-CFLAGS = -g -Wall -fno-pie -fno-dwarf2-cfi-asm -fno-asynchronous-unwind-tables -O3 -mno-red-zone $(INC) -D__KERNEL__ $(EXTRA_CFLAGS)
+CFLAGS = -g -Wall -fno-pie -fno-dwarf2-cfi-asm -fno-asynchronous-unwind-tables -O3 -mno-red-zone $(INC) -D__KERNEL__ $(EXTRA_CFLAGS) -DREQ_OFFSET=1
 LD = g++
 LDFLAGS	= -T ix.ld -no-pie -L$(AE_DIR)/fake_work
 LDLIBS	= -lrt -lpthread -lm -lnuma -ldl -lconfig -lfake ../deps/rocksdb/librocksdb.a -lgflags -lsnappy -lz -llz4 -Wl,-rpath=$(AE_DIR)/fake_work

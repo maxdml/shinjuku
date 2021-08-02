@@ -302,7 +302,7 @@ static inline struct request * rq_update(struct request_queue * rq, struct mbuf 
 	struct message * msg = (struct message *) data;
 
 
-		// To force packet compliance with non-IX comatible clients
+		// To force packet compliance with non-IX compatible clients
 /*
 		msg->runNs = 1000;
 	   msg->genNs = 0;
@@ -326,8 +326,7 @@ static inline struct request * rq_update(struct request_queue * rq, struct mbuf 
 		return req;
 		//
 */
-	//uint16_t type = msg->type - 5;
-	uint16_t type = msg->type - 1;
+	uint16_t type = msg->type - REQ_OFFSET;
         uint16_t seq_num = msg->seq_num;
         uint16_t client_id = msg->client_id;
         uint32_t req_id = msg->req_id;
