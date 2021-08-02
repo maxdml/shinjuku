@@ -12,4 +12,4 @@ cd ${AE_DIR}/Persephone/submodules/shinjuku
 make clean
 make -sj
 #sudo LD_PRELOAD=./deps/opnew/dest/libnew.so /opt/shinjuku/dp/shinjuku
-sudo ${AE_DIR}/Persephone/submodules/shinjuku/dp/shinjuku
+sudo ${AE_DIR}/Persephone/submodules/shinjuku/dp/shinjuku -c $1
