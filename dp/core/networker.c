@@ -67,8 +67,11 @@ void do_networking(void)
                 for (i = 0; i < num_recv; i++) {
 			struct request * req = rq_update(&rqueue, recv_mbufs[i]);
 			if (req) {
+#ifdef C_PRE_MQ
+				networker_pointers.types[j] = (uint8_t) recv_type[i];
+#else
 				networker_pointers.reqs[j] = req;
-				//networker_pointers.types[j] = (uint8_t) recv_type[i];
+#endif
                 networker_pointers.types[j] = (uint8_t) req->type;
 				j++;
 			}
