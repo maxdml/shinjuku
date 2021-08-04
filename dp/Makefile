@@ -28,11 +28,12 @@ DUNE	= ../deps/dune
 PCIDMA	= ../deps/pcidma
 DPDK_INC = -I$(DPDK)/build/include -I$(DPDK)/lib/librte_eal/common -I$(DPDK)/drivers/net/ixgbe -I$(DPDK)/drivers/net/i40e
 INC	= -I../inc -I$(DUNE)/libdune -I../inc/lwip -I../inc/lwip/ipv4 -I../inc/lwip/ipv6 $(DPDK_INC) -include$(DUNE)/kern/dune.h
-INC	+= -I$(PCIDMA) -I$(AE_DIR)/fake_work
+INC	+= -I$(PCIDMA) -I$(AE_DIR)/Persephone/submodules/fake_work
 INC	+= -I../deps/rocksdb/include/rocksdb
 CC = gcc
 CFLAGS = -g -Wall -fno-pie -fno-dwarf2-cfi-asm -fno-asynchronous-unwind-tables -O3 -mno-red-zone $(INC) -D__KERNEL__ $(EXTRA_CFLAGS) -DREQ_OFFSET=1
 LD = g++
+#FIXME this should be a deps of this module
 LDFLAGS	= -T ix.ld -no-pie -L$(AE_DIR)/fake_work
 LDLIBS	= -lrt -lpthread -lm -lnuma -ldl -lconfig -lfake ../deps/rocksdb/librocksdb.a -lgflags -lsnappy -lz -llz4 -Wl,-rpath=$(AE_DIR)/fake_work
 WRAP_FLAGS = -Wl,-wrap,malloc -Wl,-wrap=malloc -Wl,-wrap=free -Wl,-wrap=calloc -Wl,-wrap=realloc
