@@ -34,7 +34,7 @@ CC = gcc
 CFLAGS = -g -Wall -fno-pie -fno-dwarf2-cfi-asm -fno-asynchronous-unwind-tables -O3 -mno-red-zone $(INC) -D__KERNEL__ $(EXTRA_CFLAGS) -DREQ_OFFSET=1
 LD = g++
 #FIXME this should be a deps of this module
-LDFLAGS	= -T ix.ld -no-pie -L$(AE_DIR)/fake_work
+LDFLAGS	= -T ix.ld -no-pie -L$(AE_DIR)/Persephone/submodules/fake_work
 LDLIBS	= -lrt -lpthread -lm -lnuma -ldl -lconfig -lfake ../deps/rocksdb/librocksdb.a -lgflags -lsnappy -lz -llz4 -Wl,-rpath=$(AE_DIR)/fake_work
 WRAP_FLAGS = -Wl,-wrap,malloc -Wl,-wrap=malloc -Wl,-wrap=free -Wl,-wrap=calloc -Wl,-wrap=realloc
 
