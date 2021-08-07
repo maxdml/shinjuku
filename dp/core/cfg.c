@@ -47,8 +47,9 @@
 #include <net/ethernet.h>
 #include <net/ip.h>
 #include <ix/ethdev.h>
+#include <ix/dispatch.h>
 
-#define DEFAULT_CONF_FILE "/proj/psp-PG0/maxdml/Persephone/submodules/shinjuku/shinjuku.conf"
+#define DEFAULT_CONF_FILE "shinjuku.conf"
 
 struct cfg_parameters CFG;
 
@@ -57,6 +58,8 @@ extern int arp_insert(struct ip_addr *addr, struct eth_addr *mac);
 
 static config_t cfg;
 static char config_file[256];
+int req_offset = 1;
+enum POLICY policy = cPRESQ;
 
 static int parse_host_addr(void);
 static int parse_port(void);
@@ -436,7 +439,7 @@ static int parse_arguments(int argc, char *argv[], int *args_parsed)
 		{"log", required_argument, NULL, 'l'},
 		{NULL, 0, NULL, 0}
 	};
-	static const char *optstring = "c:l:";
+	static const char *optstring = "c:l:p:o:";
 
 	while (true) {
 		c = getopt_long(argc, argv, optstring, long_options, NULL);
@@ -456,6 +459,16 @@ static int parse_arguments(int argc, char *argv[], int *args_parsed)
 			}
 			max_loglevel = atoi(optarg);
 			break;
+		case 'o':
+		    req_offset = atoi(optarg);
+		    break;
+		case 'p':
+                    if (strncmp(optarg, "cPREMQ", 6)) {
+                        policy = cPREMQ;
+                    } else if (strncmp(optarg, "cPRESQ", 6)) {
+                        policy = cPRESQ;
+                    }
+		    break;
 		default:
 			fprintf(stderr, "cfg: invalid command option %x\n", c);
 			ret = -EINVAL;

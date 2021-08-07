@@ -47,6 +47,13 @@
 
 #define MAX_UINT64  0xFFFFFFFFFFFFFFFF
 
+extern int req_offset;
+enum POLICY {
+    cPREMQ=0,
+    cPRESQ
+};
+extern enum POLICY policy;
+
 struct mempool_datastore task_datastore;
 struct mempool task_mempool __attribute((aligned(64)));
 struct mempool_datastore fini_request_cell_datastore;
@@ -281,8 +288,8 @@ static inline int smart_tskq_dequeue(struct task_queue * tq, void ** rnbl_ptr,
                         index = i;
                 }
         }
-
         if (index != -1) {
+		log_debug("Picking queue %d\n", index);
                 return tskq_dequeue(&tq[index], rnbl_ptr, req, type, category,
                                     timestamp);
         }
@@ -326,7 +333,7 @@ static inline struct request * rq_update(struct request_queue * rq, struct mbuf 
 		return req;
 		//
 */
-	uint16_t type = msg->type - REQ_OFFSET;
+	uint16_t type = msg->type - req_offset;
         uint16_t seq_num = msg->seq_num;
         uint16_t client_id = msg->client_id;
         uint32_t req_id = msg->req_id;

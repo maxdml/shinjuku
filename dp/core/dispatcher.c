@@ -131,6 +131,7 @@ static inline void handle_networker(uint64_t cur_time)
         ucontext_t * cont;
 
         if (networker_pointers.cnt != 0) {
+		log_debug("Dispatching %d packets\n", networker_pointers.cnt);
                 for (i = 0; i < networker_pointers.cnt; i++) {
                         ret = context_alloc(&cont);
                         if (unlikely(ret)) {
@@ -139,6 +140,7 @@ static inline void handle_networker(uint64_t cur_time)
                                 continue;
                         }
                         type = networker_pointers.types[i];
+			log_debug("Dispatching type %d\n", type);
 			++queue_length[type];
                         tskq_enqueue_tail(&tskq[type], cont,
                                           networker_pointers.reqs[i],

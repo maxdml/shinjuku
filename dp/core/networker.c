@@ -67,13 +67,16 @@ void do_networking(void)
                 for (i = 0; i < num_recv; i++) {
 			struct request * req = rq_update(&rqueue, recv_mbufs[i]);
 			if (req) {
-#ifdef C_PRE_MQ
+                            networker_pointers.reqs[j] = req;
+                            if (policy == cPRESQ) {
+                                // Vanilla shinjuku takes type from UDP port
 				networker_pointers.types[j] = (uint8_t) recv_type[i];
-#else
-				networker_pointers.reqs[j] = req;
-#endif
-                networker_pointers.types[j] = (uint8_t) req->type;
-				j++;
+                            } else if (policy == cPREMQ) {
+                                // We set the type directly in the request body
+                                networker_pointers.types[j] = (uint8_t) req->type;
+                            }
+                            j++;
+			    log_debug("Received packet type %d\n", networker_pointers.types[j]);
 			}
                 }
                 networker_pointers.cnt = j;
