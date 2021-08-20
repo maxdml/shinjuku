@@ -1,0 +1,12 @@
+diff --git a/Makefile b/Makefile
+index 9d1fcdd..42c2b64 100644
+--- a/Makefile
++++ b/Makefile
+@@ -259,6 +259,7 @@ ifdef ROCKSDB_VALGRIND_RUN
+ 	PLATFORM_CXXFLAGS += -DROCKSDB_VALGRIND_RUN
+ endif
+ 
++DISABLE_JEMALLOC=1
+ ifndef DISABLE_JEMALLOC
+ 	ifdef JEMALLOC
+ 		PLATFORM_CXXFLAGS += -DROCKSDB_JEMALLOC -DJEMALLOC_NO_DEMANGLE
