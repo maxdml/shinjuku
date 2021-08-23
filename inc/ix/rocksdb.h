@@ -28,4 +28,6 @@
 
 #include <c.h>
 
+extern int rocksdb;
+
 rocksdb_t *db;

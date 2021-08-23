@@ -132,7 +132,7 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
 
         struct message * req = (struct message *) data;
 
-#ifdef ROCKSDB
+if (rocksdb) {
     asm volatile ("cli":::);
     rocksdb_readoptions_t *readoptions = rocksdb_readoptions_create();
     asm volatile ("sti":::);
@@ -194,7 +194,7 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
     asm volatile ("cli":::);
     rocksdb_readoptions_destroy(readoptions);
     asm volatile ("sti":::);
-#else
+} else {
     log_debug("spinning for %lu\n", req->runNs);
     unsigned int nloops = (unsigned int) req->runNs * 2.5;
 /*
@@ -209,7 +209,7 @@ static void generic_work(uint32_t msw, uint32_t lsw, uint32_t msw_id,
         durations[i] = (end - start) / 2.5;
     }
 */
-#endif
+}
 /*
     qsort(durations, i, sizeof(double), compare);
     printf("stats for %u iterations: \n", i);

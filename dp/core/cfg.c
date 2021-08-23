@@ -59,6 +59,7 @@ extern int arp_insert(struct ip_addr *addr, struct eth_addr *mac);
 static config_t cfg;
 static char config_file[256];
 int req_offset = 1;
+int rocksdb = 0;
 enum POLICY policy = cPRESQ;
 
 static int parse_host_addr(void);
@@ -437,9 +438,12 @@ static int parse_arguments(int argc, char *argv[], int *args_parsed)
 	static struct option long_options[] = {
 		{"config", required_argument, NULL, 'c'},
 		{"log", required_argument, NULL, 'l'},
+		{"req offset", 0, NULL, 'o'},
+		{"policy", 0, NULL, 'p'},
+		{"workload", 0, NULL, 'w'},
 		{NULL, 0, NULL, 0}
 	};
-	static const char *optstring = "c:l:p:o:";
+	static const char *optstring = "c:l:p:o:w:";
 
 	while (true) {
 		c = getopt_long(argc, argv, optstring, long_options, NULL);
@@ -467,6 +471,11 @@ static int parse_arguments(int argc, char *argv[], int *args_parsed)
                         policy = cPREMQ;
                     } else if (strncmp(optarg, "cPRESQ", 6)) {
                         policy = cPRESQ;
+                    }
+		    break;
+                case 'w':
+                    if (strncmp(optarg, "ROCKSDB", 7)) {
+                        rocksdb = 1;
                     }
 		    break;
 		default:
