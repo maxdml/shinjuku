@@ -47,38 +47,38 @@
  */
 void do_networking(void)
 {
-        int i, j, num_recv;
-	rqueue.head = NULL;
-        while(1) {
-                eth_process_poll();
-                num_recv = eth_process_recv();
-		if (num_recv == 0)
-			continue;
-                while (networker_pointers.cnt != 0);
-                for (i = 0; i < networker_pointers.free_cnt; i++) {
-			struct request * req = networker_pointers.reqs[i];
-			for (j = 0; j < req->pkts_length; j++) {
-				mbuf_free(req->mbufs[j]);
-			}
-			mempool_free(&request_mempool, req);
-                }
-                networker_pointers.free_cnt = 0;
-		j = 0;
-                for (i = 0; i < num_recv; i++) {
-			struct request * req = rq_update(&rqueue, recv_mbufs[i]);
-			if (req) {
-                            networker_pointers.reqs[j] = req;
-                            if (policy == cPRESQ) {
-                                // Vanilla shinjuku takes type from UDP port
-				networker_pointers.types[j] = (uint8_t) recv_type[i];
-                            } else if (policy == cPREMQ) {
-                                // We set the type directly in the request body
-                                networker_pointers.types[j] = (uint8_t) req->type;
-                            }
-                            j++;
-			    log_debug("Received packet type %d\n", networker_pointers.types[j]);
-			}
-                }
-                networker_pointers.cnt = j;
+    int i, j, num_recv;
+    rqueue.head = NULL;
+    while(1) {
+        eth_process_poll();
+        num_recv = eth_process_recv();
+        if (num_recv == 0)
+            continue;
+        while (networker_pointers.cnt != 0);
+        for (i = 0; i < networker_pointers.free_cnt; i++) {
+            struct request * req = networker_pointers.reqs[i];
+            for (j = 0; j < req->pkts_length; j++) {
+                mbuf_free(req->mbufs[j]);
+            }
+            mempool_free(&request_mempool, req);
         }
+        networker_pointers.free_cnt = 0;
+        j = 0;
+        for (i = 0; i < num_recv; i++) {
+            struct request * req = rq_update(&rqueue, recv_mbufs[i]);
+            if (req) {
+                networker_pointers.reqs[j] = req;
+                if (policy == cPRESQ) {
+                    // Vanilla shinjuku takes type from UDP port
+                    networker_pointers.types[j] = (uint8_t) recv_type[i];
+                } else if (policy == cPREMQ) {
+                    // We set the type directly in the request body
+                    networker_pointers.types[j] = (uint8_t) req->type;
+                }
+                log_debug("Networker received packet type %d\n", networker_pointers.types[j]);
+                j++;
+            }
+        }
+        networker_pointers.cnt = j;
+    }
 }

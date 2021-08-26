@@ -467,16 +467,18 @@ static int parse_arguments(int argc, char *argv[], int *args_parsed)
 		    req_offset = atoi(optarg);
 		    break;
 		case 'p':
-                    if (strncmp(optarg, "cPREMQ", 6)) {
-                        policy = cPREMQ;
-                    } else if (strncmp(optarg, "cPRESQ", 6)) {
-                        policy = cPRESQ;
-                    }
+            if (strncmp(optarg, "cPREMQ", 6) == 0) {
+                log_debug("Setting c-PRE-MQ dispatch\n");
+                policy = cPREMQ;
+            } else if (strncmp(optarg, "cPRESQ", 6) == 0) {
+                log_debug("Setting c-PRE-SQ dispatch\n");
+                policy = cPRESQ;
+            }
 		    break;
-                case 'w':
-                    if (strncmp(optarg, "ROCKSDB", 7)) {
-                        rocksdb = 1;
-                    }
+        case 'w':
+            if (strncmp(optarg, "ROCKSDB", 7) == 0) {
+                rocksdb = 1;
+            }
 		    break;
 		default:
 			fprintf(stderr, "cfg: invalid command option %x\n", c);

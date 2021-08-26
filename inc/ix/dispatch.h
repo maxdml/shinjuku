@@ -334,13 +334,14 @@ static inline struct request * rq_update(struct request_queue * rq, struct mbuf 
 		//
 */
 	uint16_t type = msg->type - req_offset;
+    log_debug("RQ received packet type %d\n", type);
         uint16_t seq_num = msg->seq_num;
         uint16_t client_id = msg->client_id;
         uint32_t req_id = msg->req_id;
         uint32_t pkts_length = msg->pkts_length / sizeof(struct message);
 	if (pkts_length == 1) {
 		struct request * req = mempool_alloc(&request_mempool);
-        if(unlikely(!req)) {
+        if (unlikely(!req)) {
             mbuf_free(pkt);
             return NULL;
         }
